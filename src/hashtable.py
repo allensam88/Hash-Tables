@@ -9,6 +9,9 @@ class LinkedPair:
         self.value = value
         self.next = None
 
+    def __repr__(self):
+        return f"<{self.key}, {self.value}>"
+
 
 class HashTable:
     '''
@@ -54,11 +57,28 @@ class HashTable:
 
         Fill this in.
         '''
+        # Hashmod the key to find the bucket
         index = self._hash_mod(key)
-        if self.storage[index] is not None:
-            print(f"Error: Hash collision warning. Index: {index}")
-            return
-        self.storage[index] = LinkedPair(key, value)
+        # Assign node key:value pair
+        node = self.storage[index]
+
+        # Collision case
+        if node is not None:
+            while node:
+                # if matching key, then overwrite the value
+                if node.key == key:
+                    node.value = value
+                    break
+                # if reached the end of linked list bucket, add new node pair
+                elif node.next == None:
+                    node.next = LinkedPair(key, value)
+                    break
+                # else, keeping going thru nodes in bucket, to find the last one
+                else:
+                    node = node.next
+        # no collision yet, go ahead and insert the new node
+        else:
+            self.storage[index] = LinkedPair(key, value)
 
     def remove(self, key):
         '''
@@ -69,10 +89,14 @@ class HashTable:
         Fill this in.
         '''
         index = self._hash_mod(key)
-        if self.storage[index] is None:
-            print(f"Error: Key not found. Index: {index}")
-            return
-        self.storage[index] = None
+
+        # Check if a pair exists in the bucket with matching keys
+        if self.storage[index] is not None and self.storage[index].key == key:
+            # If so, remove that pair
+            self.storage[index] = None
+        else:
+            # Else print warning
+            print("Warning: Key does not exist")
 
     def retrieve(self, key):
         '''
@@ -82,12 +106,16 @@ class HashTable:
 
         Fill this in.
         '''
+        # Get the index from hashmod
         index = self._hash_mod(key)
-        item = self.storage[index]
-        if item is None:
-            return None
+
+        # Check if a pair exists in the bucket with matching keys
+        if self.storage[index] is not None and self.storage[index].key == key:
+            # If so, return the value
+            return self.storage[index].value
         else:
-            return item.value
+            # Else return None
+            return None
 
     def resize(self):
         '''
@@ -96,7 +124,12 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        self.capacity *= 2
+        old_storage = self.storage
+        self.storage = [None] * self.capacity
+
+        for item in old_storage:
+            self.insert(item.key, item.value)
 
 
 if __name__ == "__main__":
