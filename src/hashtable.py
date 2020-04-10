@@ -108,14 +108,17 @@ class HashTable:
         '''
         # Get the index from hashmod
         index = self._hash_mod(key)
+        curr_pair = self.storage[index]
+        while curr_pair is not None:
+            # Check if a pair exists in the bucket with matching keys
+            if curr_pair.key == key:
+                # If so, return the value
+                return curr_pair.value
+            else:
+                # Else return None
+                curr_pair = curr_pair.next
 
-        # Check if a pair exists in the bucket with matching keys
-        if self.storage[index] is not None and self.storage[index].key == key:
-            # If so, return the value
-            return self.storage[index].value
-        else:
-            # Else return None
-            return None
+        return None
 
     def resize(self):
         '''
@@ -124,12 +127,20 @@ class HashTable:
 
         Fill this in.
         '''
+        # double capacity
         self.capacity *= 2
+        # save / assign the current storage
         old_storage = self.storage
+        # erase the storage
         self.storage = [None] * self.capacity
 
-        for item in old_storage:
-            self.insert(item.key, item.value)
+        # iterate thru storage
+        for bucket in old_storage:
+            current_pair = bucket
+            # iterate thru linked list bucket
+            while current_pair is not None:
+                self.insert(current_pair.key, current_pair.value)
+                current_pair = current_pair.next
 
 
 if __name__ == "__main__":
